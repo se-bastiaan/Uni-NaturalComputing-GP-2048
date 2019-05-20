@@ -37,13 +37,17 @@ def new_game(n):
 
 
 def add_tile(mat):
-    a = random.randint(0, len(mat)-1)
-    b = random.randint(0, len(mat)-1)
-    while mat[a][b] != 0:
+    if any([any([x == 0 for x in arr]) for arr in mat]):
         a = random.randint(0, len(mat)-1)
         b = random.randint(0, len(mat)-1)
-    mat[a][b] = 2 if random.random() < 0.9 else 4
-    return mat
+        while mat[a][b] != 0:
+            a = random.randint(0, len(mat)-1)
+            b = random.randint(0, len(mat)-1)
+        mat[a][b] = 2 if random.random() < 0.9 else 4
+        return mat
+
+    else:
+        return mat
 
 ###########
 # Task 1c #
@@ -94,6 +98,15 @@ def game_score(mat):
             value = mat[i][j]
             if value > 2:
                 score += value * (math.log(value, 2) - 1)
+    return int(score)
+
+
+def total_value(mat):
+    score = 0
+    for i in range(c.GRID_LEN):
+        for j in range(c.GRID_LEN):
+            value = mat[i][j]
+            score += value
     return int(score)
 
 
