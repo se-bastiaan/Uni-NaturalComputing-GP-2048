@@ -30,14 +30,12 @@ class Game:
         return logic.game_state(self.matrix) == logic.STATE_LOSE
 
     def highest_tile(self):
-        location = (-1, -1)
         score = 0
         for row in self.matrix:
             for col in self.matrix:
                 if self.matrix[row][col] > score:
                     score = self.matrix[row][col]
-                    location = (row, col)
-        return score, location
+        return score
 
     def _process_move(self, action):
         if logic.game_state(self.matrix) == logic.STATE_PROGRESS:
