@@ -1,7 +1,7 @@
 import random
 from functools import partial
 
-import numpy
+import numpy as np
 from deap import base, creator, gp, tools, algorithms
 
 from game import Game
@@ -31,7 +31,7 @@ class GamePlayer:
         self.game = Game()
 
     def fitness(self):
-        return sum(self.game.matrix) + 9 * self.game.highest_tile()
+        return np.sum(self.game.matrix) + 9 * self.game.highest_tile()
 
     def if_lost(self, out1, out2):
         return partial(if_then_else, self.game.has_lost, out1, out2)
@@ -50,8 +50,15 @@ class GamePlayer:
 
     def play(self, routine):
         self._reset()
-        while not self.game.has_lost():
+        last_score = 0
+        steps = 0
+        while not self.game.has_lost() and steps < 100:
             routine()
+            if last_score == self.game.current_score():
+                steps += 1
+            else:
+                steps = 0
+            last_score = self.game.current_score()
 
 
 player = GamePlayer()
@@ -61,7 +68,7 @@ pset.addTerminal(player.up, name='up')
 pset.addTerminal(player.down, name='down')
 pset.addTerminal(player.left, name='left')
 pset.addTerminal(player.right, name='right')
-pset.addPrimitive(player.if_lost, 2)
+# pset.addPrimitive(player.if_lost, 2)
 pset.addPrimitive(prog2, 2)
 pset.addPrimitive(prog3, 3)
 
@@ -80,19 +87,19 @@ toolbox.register("individual", tools.initIterate, creator.Individual,
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
-def evalArtificialAnt(individual):
+def evalGame(individual):
     # Transform the tree expression to functionnal Python code
     routine = gp.compile(individual, pset)
     # Run the generated routine
     player.play(routine)
 
     player.game.print_game()
-    print(player.fitness())
+    print(player.game.highest_tile(), player.fitness())
 
-    return player.fitness(),
+    return player.fitness(), player.game.highest_tile()
 
 
-toolbox.register("evaluate", evalArtificialAnt)
+toolbox.register("evaluate", evalGame)
 toolbox.register("select", tools.selTournament, tournsize=7)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
@@ -105,12 +112,14 @@ def main():
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean)
-    stats.register("std", numpy.std)
-    stats.register("min", numpy.min)
-    stats.register("max", numpy.max)
+    stats.register("avg", np.mean)
+    stats.register("std", np.std)
+    stats.register("min", np.min)
+    stats.register("max", np.max)
 
-    algorithms.eaSimple(pop, toolbox, 0.5, 0.2, 40, stats, halloffame=hof)
+    algorithms.eaSimple(pop, toolbox, 0.5, 0.2, 40, stats, halloffame=hof, verbose=True)
+
+    evalGame(hof.items[0])
 
     return pop, hof, stats
 

@@ -31,8 +31,8 @@ class Game:
 
     def highest_tile(self):
         score = 0
-        for row in self.matrix:
-            for col in self.matrix:
+        for row, values in enumerate(self.matrix):
+            for col, x in enumerate(values):
                 if self.matrix[row][col] > score:
                     score = self.matrix[row][col]
         return score
