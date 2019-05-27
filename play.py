@@ -2,7 +2,6 @@ from enum import Enum, unique
 
 import logic
 from constants import *
-import readchar
 
 
 @unique
