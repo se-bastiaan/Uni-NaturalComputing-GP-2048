@@ -33,6 +33,25 @@ class DumbPlayer(object):
             return Terminal.Left
 
 
+class GPPlayer(object):
+    def __init__(self, individual_fn):
+        self.individual_fn = individual_fn
+
+    def play(self, game):
+        game = [cell for row in game for cell in row]
+        args = {"ARG" + str(i): game[i] for i in range(16)}
+        move_str = self.individual_fn(**args)
+
+        if move_str == "left":
+            return Terminal.Left
+        elif move_str == "up":
+            return Terminal.Up
+        elif move_str == "right":
+            return Terminal.Right
+        elif move_str == "down":
+            return Terminal.Down
+
+
 class Automated2048(object):
     state = None
 
@@ -69,6 +88,8 @@ class Automated2048(object):
             new_state, _ = logic.right(self.state)
         elif move == Terminal.Down:
             new_state, _ = logic.down(self.state)
+        else:
+            raise Exception("Move is not one of Left, Up, Right, Down but is {}".format(str(move)))
         
         self.state = new_state
 
