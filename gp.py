@@ -36,20 +36,21 @@ class GamePlayer:
     LEFT = 'left'
     RIGHT = 'right'
 
-    game = Game()
+    game = None
+    commands = None
 
     def __init__(self) -> None:
         super().__init__()
+        self._reset()
 
+    def _reset(self):
+        self.game = Game()
         self.commands = {
             self.UP: self.game.up,
             self.DOWN: self.game.down,
             self.LEFT: self.game.left,
             self.RIGHT: self.game.right,
         }
-
-    def _reset(self):
-        self.game = Game()
 
     def fitness(self):
         return np.sum(self.game.matrix) + 9 * self.game.highest_tile()
@@ -120,7 +121,7 @@ def evalGame(individual):
 toolbox.register("evaluate", evalGame)
 toolbox.register("select", tools.selTournament, tournsize=7)
 toolbox.register("mate", gp.cxOnePoint)
-toolbox.register("expr_mut", gp.genFull, min_=1, max_=2)
+toolbox.register("expr_mut", gp.genFull, min_=1, max_=5)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
 # pool = multiprocessing.Pool()
