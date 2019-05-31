@@ -35,3 +35,10 @@ KEY_DOWN = "'s'"
 KEY_LEFT = "'a'"
 KEY_RIGHT = "'d'"
 KEY_BACK = "'b'"
+
+
+class Move:
+    Left = 'left'
+    Up = 'up'
+    Right = 'right'
+    Down = 'down'

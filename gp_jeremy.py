@@ -1,13 +1,15 @@
+import multiprocessing
 import operator
 import random
 from functools import partial
 
-import numpy
+import numpy as np
 from deap import base, creator, gp, tools, algorithms
 
 # import logic
+from constants import Move
 from game import Game
-from play import Automated2048, GPPlayer
+from player import GPPlayer
 
 
 def progn(*args):
@@ -67,10 +69,10 @@ def if_then_else(condition, out1, out2):
 
 
 pset = gp.PrimitiveSetTyped("main", [int] * 16, str)
-pset.addTerminal('left', str, name='left')
-pset.addTerminal('up', str, name='up')
-pset.addTerminal('right', str, name='right')
-pset.addTerminal('down', str, name='down')
+pset.addTerminal(Move.Left, str, name='left')
+pset.addTerminal(Move.Up, str, name='up')
+pset.addTerminal(Move.Right, str, name='right')
+pset.addTerminal(Move.Down, str, name='down')
 
 pset.addTerminal(True, bool, name='bool_true')
 
@@ -85,15 +87,14 @@ GAMES_PER_INDIVIDUAL = 10
 def evaluateIndividual(individual):
     fn = gp.compile(individual, pset)
     player = GPPlayer(fn)
-    game = Automated2048()
+    game = Game()
 
     scores = [game.play_game(player) for i in range(GAMES_PER_INDIVIDUAL)]
-    average = sum(scores) / GAMES_PER_INDIVIDUAL
 
-    return [average]
+    return tuple(map(np.median, list(zip(*scores))))
 
 
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("FitnessMax", base.Fitness, weights=(0.1, 1.0, 0.5))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
@@ -107,23 +108,34 @@ toolbox.register("individual", tools.initIterate, creator.Individual,
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
-def evalArtificialAnt(individual):
-    # Transform the tree expression to functionnal Python code
-    routine = gp.compile(individual, pset)
-    # Run the generated routine
-    player.play(routine)
-
-    player.game.print_game()
-    print(player.fitness())
-
-    return player.fitness()
-
-
 toolbox.register("evaluate", evaluateIndividual)
 toolbox.register("select", tools.selTournament, tournsize=7)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
+
+pool = multiprocessing.Pool()
+toolbox.register("map", pool.map)
+
+
+def stats_f(ind):
+    return ind.fitness.values
+
+
+def stats_min(i):
+    return list(map(np.min, zip(*i)))
+
+
+def stats_max(i):
+    return list(map(np.max, zip(*i)))
+
+
+def stats_std(i):
+    return list(map(np.std, zip(*i)))
+
+
+def stats_avg(i):
+    return list(map(np.mean, zip(*i)))
 
 
 def main():
@@ -131,11 +143,11 @@ def main():
 
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean)
-    stats.register("std", numpy.std)
-    stats.register("min", numpy.min)
-    stats.register("max", numpy.max)
+    stats = tools.Statistics(stats_f)
+    stats.register("min", stats_min)
+    stats.register("max", stats_max)
+    stats.register("std", stats_std)
+    stats.register("avg", stats_avg)
 
     algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats, halloffame=hof)
 
