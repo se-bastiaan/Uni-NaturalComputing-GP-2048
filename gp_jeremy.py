@@ -104,7 +104,7 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
 toolbox = base.Toolbox()
 
 # Attribute generator
-toolbox.register("expr_init", gp.genFull, pset=pset, min_=1, max_=5)
+toolbox.register("expr_init", gp.genFull, pset=pset, min_=2, max_=10)
 
 # Structure initializers
 toolbox.register("individual", tools.initIterate, creator.Individual,
