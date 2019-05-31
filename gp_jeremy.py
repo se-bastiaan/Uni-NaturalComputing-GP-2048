@@ -83,18 +83,22 @@ pset.addPrimitive(operator.lt, [int, int], bool, name='lt')
 pset.addPrimitive(operator.gt, [int, int], bool, name='gt')
 
 
-GAMES_PER_INDIVIDUAL = 10
+GAMES_PER_INDIVIDUAL = 11
 def evaluateIndividual(individual):
     fn = gp.compile(individual, pset)
     player = GPPlayer(fn)
     game = Game()
 
-    scores = [game.play_game(player) for i in range(GAMES_PER_INDIVIDUAL)]
+    scores = np.array([game.play_game(player) for i in range(GAMES_PER_INDIVIDUAL)]).transpose()
 
-    return tuple(map(np.median, list(zip(*scores))))
+    ret_val = (np.median(scores[0]),  # total sum of tiles
+               np.max(scores[1]),  # max tile
+               np.median(scores[2]))  # fitness calc result
+
+    return ret_val
 
 
-creator.create("FitnessMax", base.Fitness, weights=(0.1, 1.0, 0.5))
+creator.create("FitnessMax", base.Fitness, weights=(0.2, 1.0, 0.2))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
@@ -149,7 +153,7 @@ def main():
     stats.register("std", stats_std)
     stats.register("avg", stats_avg)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats, halloffame=hof)
+    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=400, stats=stats, halloffame=hof)
 
     return pop, hof, stats
 
