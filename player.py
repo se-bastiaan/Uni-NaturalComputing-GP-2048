@@ -1,10 +1,20 @@
-from constants import Move
+from constants import Move, GRID_LEN
+
+
+class GridItem:
+    location = None
+    value = None
+
+    def __init__(self, location, value) -> None:
+        super().__init__()
+        self.location = location
+        self.value = value
 
 
 class Player(object):
     def __init__(self):
         pass
-    
+
     def play(self, game):
         raise NotImplementedError('Implement this in a subclass of Player!')
 
@@ -27,5 +37,6 @@ class GPPlayer(object):
 
     def play(self, game):
         game = [cell for row in game for cell in row]
-        args = {"ARG" + str(i): game[i] for i in range(16)}
+        args = {"ARG" + str(i): GridItem(i, game[i])
+                for i in range(GRID_LEN * GRID_LEN)}
         return self.individual_fn(**args)
