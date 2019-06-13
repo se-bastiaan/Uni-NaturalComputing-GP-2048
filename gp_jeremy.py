@@ -1,5 +1,7 @@
 import multiprocessing
 import operator
+import random
+from functools import partial
 
 import numpy as np
 from deap import base, creator, gp, tools, algorithms
@@ -14,37 +16,15 @@ def if_then_else(condition, out1, out2):
     return out1 if condition else out2
 
 
-# class GamePlayer:
-#     game = Game()Ò
 
-#     def _reset(self):
-#         self.game = Game()
+# Settings
+GAMES_PER_INDIVIDUAL = 5
+N_GENERATIONS = 40
+N_INDIVIDUALS = 300
 
-#     def fitness(self):
-#         return sum(self.game.matrix) + 9 * self.game.highest_tile()
-
-#     def if_lost(self, out1, out2):
-#         return partial(if_then_else, self.game.has_lost, out1, out2)
-
-#     def up(self):
-#         self.game.up()
-
-#     def down(self):
-#         self.game.down()
-
-#     def left(self):
-#         self.game.left()
-
-#     def right(self):
-#         self.game.right()
-
-#     def play(self, routine):
-#         self._reset()
-#         while not self.game.has_lost():
-#             routine()
+MAX_DEPTH = 5
 
 
-# player = GamePlayer()
 
 # Routines we can give the player:
 # * Get position of highest tile
@@ -113,7 +93,7 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
 toolbox = base.Toolbox()
 
 # Attribute generator
-toolbox.register("expr_init", gp.genFull, pset=pset, min_=8, max_=11)
+toolbox.register("expr_init", gp.genFull, pset=pset, min_=1, max_=MAX_DEPTH)
 
 # Structure initializers
 toolbox.register("individual", tools.initIterate, creator.Individual,
@@ -126,6 +106,7 @@ toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
+# Allow multiprocessing
 pool = multiprocessing.Pool()
 toolbox.register("map", pool.map)
 
@@ -153,7 +134,7 @@ def stats_avg(i):
 def main():
     # random.seed(37)
 
-    pop = toolbox.population(n=300)
+    pop = toolbox.population(n=N_INDIVIDUALS)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(stats_f)
     stats.register("min", stats_min)
@@ -161,21 +142,7 @@ def main():
     stats.register("std", stats_std)
     stats.register("avg", stats_avg)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40,
-                        stats=stats, halloffame=hof)
-
-    # import pygraphviz as pgv
-    #
-    # g = pgv.AGraph()
-    # g.add_nodes_from(nodes)
-    # g.add_edges_from(edges)
-    # g.layout(prog="dot")
-    #
-    # for i in nodes:
-    #     n = g.get_node(i)
-    #     n.attr["label"] = labels[i]
-    #
-    # g.draw("tree.pdf")
+    algorithms.eaSimple(pop, toolbox, cxpb=0.2, mutpb=0.5, ngen=N_GENERATIONS, stats=stats, halloffame=hof)
 
     return pop, hof, stats
 
