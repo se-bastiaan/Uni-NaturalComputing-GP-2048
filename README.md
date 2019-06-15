@@ -3,7 +3,6 @@ Genetic programming to try to solve 2048-python
 
 Based on the popular game [2048](https://github.com/gabrielecirulli/2048) by Gabriele Cirulli.
 
-![screenshot](img/screenshot.png)
 
 To let the genetic algorithm play 2048, simply run the file genetic_programme.py.
 
