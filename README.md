@@ -13,6 +13,6 @@ To let the random player play 2048, run the file random_game.py.
 Contributors:
 ==
 
-- [Anneloes Ernest]
-- [Jermy Guijt]
-- [Sébastiaan Versteeg]
+- Anneloes Ernest
+- Jermy Guijt
+- Sébastiaan Versteeg
