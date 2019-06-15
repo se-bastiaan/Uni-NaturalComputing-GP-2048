@@ -27,7 +27,7 @@ class Game:
         for row in self.matrix:
             row_line = ''
             for value in row:
-                row_line += f' {value}  '
+                row_line += ' {}  '.format(value)
             print(row_line)
 
     def current_score(self):

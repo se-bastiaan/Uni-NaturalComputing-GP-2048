@@ -18,13 +18,11 @@ def if_then_else(condition, out1, out2):
 
 
 # Settings
-GAMES_PER_INDIVIDUAL = 5
-N_GENERATIONS = 40
+GAMES_PER_INDIVIDUAL = 10
+N_GENERATIONS = 3
 N_INDIVIDUALS = 300
 
 MAX_DEPTH = 5
-
-
 
 # Routines we can give the player:
 # * Get position of highest tile
@@ -71,8 +69,6 @@ GAMES_PER_INDIVIDUAL = 11
 
 
 def evaluateIndividual(individual):
-    # print(individual)
-    # print('\n')
     fn = gp.compile(individual, pset)
     player = GPPlayer(fn)
     game = Game()
@@ -148,4 +144,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    pop, hof, stats = main()
+    print("Best individual (re-evaluated):")
+    print(evaluateIndividual(hof[0]))
