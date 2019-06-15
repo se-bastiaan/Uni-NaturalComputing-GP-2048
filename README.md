@@ -17,5 +17,5 @@ Contributors:
 ==
 
 - Anneloes Ernest
-- Jermy Guijt
+- Jeremy Guijt
 - Sébastiaan Versteeg
